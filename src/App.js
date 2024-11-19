@@ -19,6 +19,13 @@ import useLocalStorage from "./hooks/useLocalStorage";
 import { MorePatternsModal } from "./components/MorePatternsModal";
 
 function App() {
+  const normalizePattern = (pattern) => {
+    return pattern.replace(/%{(\w+):([\w.]+)}/g, (match, patternName, attributeName) => {
+      const normalizedAttributeName = attributeName.replace(/\./g, '__DOT__');
+      return `%{${patternName}:${normalizedAttributeName}}`;
+    });
+  };
+
   CodeMirror.defineSimpleMode("grokMode", grokMode);
 
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -133,10 +140,12 @@ function App() {
 
   const parseSample = async (lineNumber) => {
     try {
-      let p = groks.createPattern(pattern);
+      let normalizedPattern = normalizePattern(pattern);
+      let p = groks.createPattern(normalizedPattern);
       let sampleLine = samplesEditor.getLine(lineNumber);
       let result = await p.parse(sampleLine);
       if (!result) return null;
+
       let matches = p.regexp.searchSync(sampleLine).filter((m) => m.length > 0);
       matches.forEach((m, i) => {
         let bgColor = i === 0 ? "rgb(230, 180, 50, 0.3)" : "rgb(127, 191, 63, 0.4)";
@@ -146,9 +155,12 @@ function App() {
           { css: "background-color: " + bgColor + " !important" }
         );
       });
+
+      // Map results back to original attribute names
       let data = {};
-      Object.keys(result).map((key, i) => {
-        data[key] = +result[key] === 0 ? 0 : +result[key] || result[key];
+      Object.keys(result).forEach((key) => {
+        const originalKey = key.replace(/__DOT__/g, '.');
+        data[originalKey] = +result[key] === 0 ? 0 : +result[key] || result[key];
       });
       return data;
     } catch (error) {
@@ -311,17 +323,17 @@ function App() {
                   completeSingle: false,
                   hint: (editor) => {
                     let cursorPos = editor.getDoc().getCursor();
-                    let lastTokenRegex = /%{([^:}]*)$/g;
+                    let lastTokenRegex = /%{(\w+):([\w.]*)$/g;
                     let keyword = lastTokenRegex.exec(pattern.substr(0, cursorPos.ch));
                     if (keyword !== null) {
                       const activeCollections = collections.filter((c) => c.active).map((c) => c.value);
                       return {
-                        from: { ...cursorPos, ch: cursorPos.ch - keyword[1].length },
+                        from: { ...cursorPos, ch: cursorPos.ch - keyword[2].length },
                         to: cursorPos,
                         list: patterns
                           .filter((p) => activeCollections.includes(p.collection))
-                          .filter((p) => RegExp(keyword[1], "i").test(p.id))
-                          .map((p) => p.id),
+                          .filter((p) => RegExp(keyword[2], "i").test(p.id))
+                          .map((p) => p.id), // Keep the original format here
                       };
                     }
                   },

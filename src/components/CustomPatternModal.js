@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, PlusSquare, Save, X } from "react-feather";
+import { AlertTriangle, PlusSquare, X } from "react-feather";
 
 const nameRegex = /^([A-Z0-9_]+)$/;
 
@@ -18,7 +18,7 @@ export const CustomPatternModal = ({
   const firstUpdate = useRef(true);
 
   useEffect(() => {
-    if (pattern == "") {
+    if (pattern === "") {
       return setWarnMessage("Grok pattern cannot be blank.");
     }
     if (firstUpdate.current) {

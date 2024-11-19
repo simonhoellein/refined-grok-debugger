@@ -85,6 +85,7 @@ function App() {
   const loadCustomPatterns = async () => {
     customPatterns.map((p) => {
       groks.createPattern(p.pattern, p.id);
+      return process(p.pattern);
     });
   };
 
@@ -126,7 +127,7 @@ function App() {
       });
       setPatterns((patterns) => [...patterns, ...newPatterns.flat()]);
       const updatedCollection = [...collections].map((c) => {
-        if (c.value == value) {
+        if (c.value === value) {
           return { ...c, active: true };
         } else {
           return c;
@@ -276,7 +277,7 @@ function App() {
               ></Select>
             </div>
             <div style={{ marginTop: 10 }}>
-              <a href="https://github.com/cjslack/grok-debugger/tree/master/public/patterns" target="_blank">
+              <a href="https://github.com/cjslack/grok-debugger/tree/master/public/patterns" target="_blank" rel="noopener noreferrer">
                 <button className="btn secondary">
                   <ExternalLink />
                   <span>Pattern Repository</span>

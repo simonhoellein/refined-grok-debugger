@@ -26,13 +26,13 @@ export const Navbar = () => {
     <div className="navbar" style={styles.navbar}>
       <h1>
         {/* <span style={{ color: '#82aaff' }}>{'%{'}</span> */}
-        <span style={{ color: "#89DDFF" }}>Grok </span>
+        <span style={{ color: "#89DDFF" }}>Refined Grok </span>
         {/* <span style={{ color: '#82aaff' }}>:</span> */}
         <span style={{ color: "#C792EA" }}>Debugger</span>
         {/* <span style={{ color: '#82aaff' }}>{'}'}</span> */}
       </h1>
       <div className="nav-links">
-        <a href="https://github.com/cjslack/grok-debugger" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/simonhoellein/grok-debugger" target="_blank" rel="noopener noreferrer">
           <GitHub />
           <span>GitHub</span>
         </a>

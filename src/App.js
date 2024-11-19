@@ -12,7 +12,6 @@ import "codemirror/addon/scroll/simplescrollbars";
 import grokMode from "./codemirror/grok";
 import { LoadModal } from "./components/LoadModal";
 import { ShareModal } from "./components/ShareModal";
-import { Ad } from "./components/Ad";
 import { CustomPatternModal } from "./components/CustomPatternModal";
 import Select from "react-select";
 import useLocalStorage from "./hooks/useLocalStorage";
@@ -291,7 +290,7 @@ function App() {
               </button>
             </div>
           </div>
-          <Ad />
+
         </div>
         <div className="main">
           <div className="pattern-wrapper">

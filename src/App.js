@@ -323,16 +323,16 @@ function App() {
                   completeSingle: false,
                   hint: (editor) => {
                     let cursorPos = editor.getDoc().getCursor();
-                    let lastTokenRegex = /%{(\w+):([\w.]*)$/g;
+                    let lastTokenRegex = /%{([^:}]*)$/g;
                     let keyword = lastTokenRegex.exec(pattern.substr(0, cursorPos.ch));
                     if (keyword !== null) {
                       const activeCollections = collections.filter((c) => c.active).map((c) => c.value);
                       return {
-                        from: { ...cursorPos, ch: cursorPos.ch - keyword[2].length },
+                        from: { ...cursorPos, ch: cursorPos.ch - keyword[1].length },
                         to: cursorPos,
                         list: patterns
                           .filter((p) => activeCollections.includes(p.collection))
-                          .filter((p) => RegExp(keyword[2], "i").test(p.id))
+                          .filter((p) => RegExp(keyword[1], "i").test(p.id))
                           .map((p) => p.id), // Keep the original format here
                       };
                     }

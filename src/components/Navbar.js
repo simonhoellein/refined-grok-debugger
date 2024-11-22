@@ -32,7 +32,7 @@ export const Navbar = () => {
         {/* <span style={{ color: '#82aaff' }}>{'}'}</span> */}
       </h1>
       <div className="nav-links">
-        <a href="https://github.com/simonhoellein/grok-debugger" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/simonhoellein/refined-grok-debugger" target="_blank" rel="noopener noreferrer">
           <GitHub />
           <span>GitHub</span>
         </a>

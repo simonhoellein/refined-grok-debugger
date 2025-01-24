@@ -10,7 +10,7 @@
     "@testing-library/user-event": "^7.2.1",
     "codemirror": "^5.65.18",
     "grok-js": "github:cjslack/grok-js-web",
-    "node-fetch": "^2.7.0",
+    "node-fetch": "^3.0.0",
     "onigasm": "^2.2.5",
     "oniguruma": "^7.2.1",
     "postcss-selector-parser": "^6.1.2",

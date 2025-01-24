@@ -8,7 +8,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
-    "codemirror": "^5.65.18",
+    "codemirror": "^6.0.0",
     "grok-js": "github:cjslack/grok-js-web",
     "node-fetch": "^2.7.0",
     "onigasm": "^2.2.5",

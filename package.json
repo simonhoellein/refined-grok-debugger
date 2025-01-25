@@ -20,7 +20,7 @@
     "react-feather": "^2.0.8",
     "react-scripts": "^5.0.1",
     "react-select": "^5.7.0",
-    "simplebar-react": "^2.2.1",
+    "simplebar-react": "^3.0.0",
     "typescript": "3.9.10"
   },
   "scripts": {

@@ -21,7 +21,7 @@
     "react-scripts": "^5.0.1",
     "react-select": "^5.7.0",
     "simplebar-react": "^3.0.0",
-    "typescript": "3.9.10"
+    "typescript": "5.7.3"
   },
   "scripts": {
     "start": "react-scripts start",

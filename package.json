@@ -15,7 +15,7 @@
     "oniguruma": "^7.2.1",
     "postcss-selector-parser": "^6.1.2",
     "react": "^16.13.1",
-    "react-codemirror2": "^7.2.1",
+    "react-codemirror2": "^8.0.0",
     "react-dom": "^16.13.1",
     "react-feather": "^2.0.8",
     "react-scripts": "^5.0.1",

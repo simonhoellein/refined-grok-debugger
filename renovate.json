@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":separateMajorReleases"
+  ],
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "rangeStrategy": "replace",
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchPackagePatterns": ["^@testing-library/", "jest", "react-scripts"],
+      "groupName": "testing stack"
+    },
+    {
+      "matchPackageNames": ["react", "react-dom"],
+      "groupName": "react core"
+    },
+    {
+      "matchDatasources": ["github-tags", "github-releases"],
+      "prHourlyLimit": 2
+    }
+  ]
+}

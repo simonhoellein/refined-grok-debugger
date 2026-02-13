@@ -1,4 +1,4 @@
-export default {
+const grokMode = {
   // The start state contains the rules that are intially used
   start: [
     // The regex matches the token, the token property contains the type
@@ -8,7 +8,7 @@ export default {
     // Rules are matched in the order in which they ap
     { regex: /(%{)([^:}]+)(})/, token: ['def', 'operator', 'def'] },
     { regex: /(%{)([^:}]+)(:)([^}]+)(})/, token: ['def', 'operator', 'def', 'keyword', 'def'] },
-    { regex: /(\\)([\[|\.|\^|\$|\*|\+|\?|\(|\)|\[|\{|\\|\||\]])/, token: ['qualifier', null] },
+    { regex: /(\\)([\[\].^$*+?(){}\\|])/, token: ['qualifier', null] },
     { regex: /(\()(\?)(<)([^>]+)(>)/, token: [null, 'def', 'def', 'keyword', 'def'] },
   ],
   // The meta property contains global information about the mode. It
@@ -17,3 +17,5 @@ export default {
   // specific to simple modes.
   meta: {},
 };
+
+export default grokMode;

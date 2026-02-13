@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { GrokCollection } from "grok-js";
 import { Navbar } from "./components/Navbar";
 import { UnControlled as CodeMirrorTextarea } from "react-codemirror2";
@@ -17,18 +17,48 @@ import Select from "react-select";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { MorePatternsModal } from "./components/MorePatternsModal";
 
+const DEFAULT_COLLECTIONS = [
+  { value: "custom", label: "Custom", active: true },
+  { value: "aws", label: "AWS", active: false },
+  { value: "bacula", label: "Bacula", active: false },
+  { value: "bind", label: "BIND", active: false },
+  { value: "bro", label: "Bro", active: false },
+  { value: "exim", label: "Exim", active: false },
+  { value: "firewalls", label: "Firewalls", active: false },
+  { value: "grok-patterns", label: "Grok Patterns", active: true },
+  { value: "haproxy", label: "HAProxy", active: false },
+  { value: "httpd", label: "Httpd", active: false },
+  { value: "java", label: "Java", active: false },
+  { value: "junos", label: "Junos", active: false },
+  { value: "linux-syslog", label: "Syslog", active: false },
+  { value: "maven", label: "Maven", active: false },
+  { value: "mcollective", label: "MCollective", active: false },
+  { value: "mongodb", label: "MongoDB", active: false },
+  { value: "nagios", label: "Nagios", active: false },
+  { value: "postfix", label: "Postfix", active: false },
+  { value: "postgresql", label: "PostgreSQL", active: false },
+  { value: "rails", label: "Rails", active: false },
+  { value: "redis", label: "Redis", active: false },
+  { value: "ruby", label: "Ruby", active: false },
+  { value: "squid", label: "Squid", active: false },
+  { value: "zeek", label: "Zeek", active: false },
+];
+
+const normalizePattern = (pattern) => {
+  return pattern.replace(/%{(\w+):([\w.]+)}/g, (match, patternName, attributeName) => {
+    const normalizedAttributeName = attributeName.replace(/\./g, "__DOT__");
+    return `%{${patternName}:${normalizedAttributeName}}`;
+  });
+};
+
 function App() {
-  const normalizePattern = (pattern) => {
-    return pattern.replace(/%{(\w+):([\w.]+)}/g, (match, patternName, attributeName) => {
-      const normalizedAttributeName = attributeName.replace(/\./g, '__DOT__');
-      return `%{${patternName}:${normalizedAttributeName}}`;
-    });
-  };
 
   CodeMirror.defineSimpleMode("grokMode", grokMode);
 
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  const qsParams = Object.fromEntries(urlSearchParams.entries());
+  const qsParams = useMemo(() => {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    return Object.fromEntries(urlSearchParams.entries());
+  }, []);
 
   const [groks] = useState(new GrokCollection());
   let [pattern, setPattern] = useLocalStorage("gd-pattern", "");
@@ -44,49 +74,48 @@ function App() {
   let [matchCount, setMatchCount] = useState(0);
   let [sampleCount, setSampleCount] = useState(0);
 
-  const defaultCollections = [
-    { value: "custom", label: "Custom", active: true },
-    { value: "aws", label: "AWS", active: false },
-    { value: "bacula", label: "Bacula", active: false },
-    { value: "bind", label: "BIND", active: false },
-    { value: "bro", label: "Bro", active: false },
-    { value: "exim", label: "Exim", active: false },
-    { value: "firewalls", label: "Firewalls", active: false },
-    { value: "grok-patterns", label: "Grok Patterns", active: true },
-    { value: "haproxy", label: "HAProxy", active: false },
-    { value: "httpd", label: "Httpd", active: false },
-    { value: "java", label: "Java", active: false },
-    { value: "junos", label: "Junos", active: false },
-    { value: "linux-syslog", label: "Syslog", active: false },
-    { value: "maven", label: "Maven", active: false },
-    { value: "mcollective", label: "MCollective", active: false },
-    { value: "mongodb", label: "MongoDB", active: false },
-    { value: "nagios", label: "Nagios", active: false },
-    { value: "postfix", label: "Postfix", active: false },
-    { value: "postgresql", label: "PostgreSQL", active: false },
-    { value: "rails", label: "Rails", active: false },
-    { value: "redis", label: "Redis", active: false },
-    { value: "ruby", label: "Ruby", active: false },
-    { value: "squid", label: "Squid", active: false },
-    { value: "zeek", label: "Zeek", active: false },
-  ];
-
-  let [collections, setCollections] = useLocalStorage("gd-collections", defaultCollections);
+  let [collections, setCollections] = useLocalStorage("gd-collections", DEFAULT_COLLECTIONS);
 
   const firstUpdate = useRef(true);
 
-  const loadExternalPatterns = async () => {
+  const loadCollection = useCallback(
+    async (value, label, url) => {
+      if (patterns.find((p) => p.collection === value)) return;
+      const resolvedLabel = label || value;
+      const resolvedUrl = url || "/patterns/" + value;
+      try {
+        const newPatterns = await groks.load(resolvedUrl).then((ids) => {
+          return ids.map((id) => {
+            return { id, collection: value };
+          });
+        });
+        setPatterns((current) => [...current, ...newPatterns]);
+        setCollections((current) =>
+          current.map((c) => {
+            if (c.value === value) {
+              return { ...c, active: true, label: resolvedLabel, url: resolvedUrl };
+            }
+            return c;
+          })
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [groks, patterns, setCollections, setPatterns]
+  );
+
+  const loadExternalPatterns = useCallback(async () => {
     await Promise.all(
       collections.filter((c) => c.active && c.value !== "custom").map((c) => loadCollection(c.value, c.label, c.url))
     );
-  };
+  }, [collections, loadCollection]);
 
-  const loadCustomPatterns = async () => {
-    customPatterns.map((p) => {
+  const loadCustomPatterns = useCallback(async () => {
+    customPatterns.forEach((p) => {
       groks.createPattern(p.pattern, p.id);
-      return process(p.pattern);
     });
-  };
+  }, [customPatterns, groks]);
 
   useEffect(() => {
     setPatterns((patterns) => [
@@ -97,7 +126,7 @@ function App() {
     ]);
   }, [customPatterns]);
 
-  const onLoad = async () => {
+  const onLoad = useCallback(async () => {
     // load query string parameters (if there are any)
     if (qsParams.pattern) setPattern(qsParams.pattern);
     if (qsParams.sample) setSample(qsParams.sample);
@@ -105,70 +134,54 @@ function App() {
     await loadCustomPatterns();
 
     // add any collections in default that user does not have in localstorage store
-    const newCollections = defaultCollections.filter((d) => {
-      return !collections.map((c) => c.value).includes(d.value);
+    setCollections((current) => {
+      const newCollections = DEFAULT_COLLECTIONS.filter((d) => {
+        return !current.map((c) => c.value).includes(d.value);
+      });
+      if (!newCollections.length) {
+        return current;
+      }
+      return [...current, ...newCollections];
     });
-    if (newCollections.length) {
-      setCollections((collections) => [...collections, ...newCollections]);
-    }
-  };
+  }, [loadCustomPatterns, loadExternalPatterns, qsParams, setCollections, setPattern, setSample]);
 
-  const loadCollection = async (value, label, url) => {
-    if (patterns.find((p) => p.collection === value)) return;
-    label = label || value;
-    url = url || "/patterns/" + value;
-    try {
-      const newPatterns = await groks.load(url).then((ids) => {
-        return ids.map((id) => {
-          if (patterns.includes({ id, collection: value })) return;
-          return { id, collection: value };
+  const parseSample = useCallback(
+    async (lineNumber) => {
+      if (!samplesEditor) return null;
+      try {
+        let normalizedPattern = normalizePattern(pattern);
+        let p = groks.createPattern(normalizedPattern);
+        let sampleLine = samplesEditor.getLine(lineNumber);
+        let result = await p.parse(sampleLine);
+        if (!result) return null;
+
+        let matches = p.regexp.searchSync(sampleLine).filter((m) => m.length > 0);
+        matches.forEach((m, i) => {
+          let bgColor = i === 0 ? "rgb(230, 180, 50, 0.3)" : "rgb(127, 191, 63, 0.4)";
+          samplesEditor.markText(
+            { line: lineNumber, ch: m.start },
+            { line: lineNumber, ch: m.end },
+            { css: "background-color: " + bgColor + " !important" }
+          );
         });
-      });
-      setPatterns((patterns) => [...patterns, ...newPatterns.flat()]);
-      const updatedCollection = [...collections].map((c) => {
-        if (c.value === value) {
-          return { ...c, active: true };
-        } else {
-          return c;
-        }
-      });
-      setCollections(updatedCollection);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
-  const parseSample = async (lineNumber) => {
-    try {
-      let normalizedPattern = normalizePattern(pattern);
-      let p = groks.createPattern(normalizedPattern);
-      let sampleLine = samplesEditor.getLine(lineNumber);
-      let result = await p.parse(sampleLine);
-      if (!result) return null;
+        // Map results back to original attribute names
+        let data = {};
+        Object.keys(result).forEach((key) => {
+          const originalKey = key.replace(/__DOT__/g, ".");
+          data[originalKey] = +result[key] === 0 ? 0 : +result[key] || result[key];
+        });
+        return data;
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    },
+    [groks, pattern, samplesEditor]
+  );
 
-      let matches = p.regexp.searchSync(sampleLine).filter((m) => m.length > 0);
-      matches.forEach((m, i) => {
-        let bgColor = i === 0 ? "rgb(230, 180, 50, 0.3)" : "rgb(127, 191, 63, 0.4)";
-        samplesEditor.markText(
-          { line: lineNumber, ch: m.start },
-          { line: lineNumber, ch: m.end },
-          { css: "background-color: " + bgColor + " !important" }
-        );
-      });
-
-      // Map results back to original attribute names
-      let data = {};
-      Object.keys(result).forEach((key) => {
-        const originalKey = key.replace(/__DOT__/g, '.');
-        data[originalKey] = +result[key] === 0 ? 0 : +result[key] || result[key];
-      });
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleParse = async () => {
+  const handleParse = useCallback(async () => {
+    if (!samplesEditor) return;
     try {
       let output = [];
       const lines = samplesEditor.lineCount() - 1;
@@ -187,11 +200,11 @@ function App() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [parseSample, samplesEditor]);
 
   useEffect(() => {
     onLoad();
-  }, []);
+  }, [onLoad]);
 
   useEffect(() => {
     if (firstUpdate.current) {
@@ -200,7 +213,7 @@ function App() {
     }
     let timeout = setTimeout(() => handleParse(), 250);
     return () => clearTimeout(timeout);
-  }, [pattern, sample, patterns]);
+  }, [handleParse, pattern, sample, patterns]);
 
   const handleChangePattern = (editor, data, value) => {
     setPattern(value);

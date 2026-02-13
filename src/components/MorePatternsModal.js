@@ -3,7 +3,7 @@ import { DownloadCloud, Trash2, X, XOctagon } from "react-feather";
 
 export const MorePatternsModal = ({ setShowModal, collections, setCollections, patterns, setPatterns, groks }) => {
   const urlRegex =
-    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.+~#?&//=]*)/;
   const titleRegex = /^[\w\d _-]{1,20}/;
 
   const [url, setUrl] = useState("");

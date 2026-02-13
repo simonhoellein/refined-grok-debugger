@@ -9,19 +9,16 @@ export const ShareModal = ({ setShowModal, pattern, sample }) => {
 
   const ref = useRef();
 
-  const onLoad = async () => {
+  useEffect(() => {
     setUrl(
       window.location.origin + "?pattern=" + encodeURIComponent(pattern) + "&sample=" + encodeURIComponent(sample)
       // + "&collections=" +
       // encodeURIComponent(JSON.stringify(collections.filter((c) => c.active)))
     );
-  };
+  }, [pattern, sample]);
 
   useEffect(() => {
-    onLoad();
-  }, []);
-
-  useEffect(() => {
+    if (!ref.current) return;
     ref.current.select();
     if (url.length > 2000) return setShowWarn(true);
     setShowWarn(false);

@@ -36,7 +36,7 @@ export const CustomPatternModal = ({
       }
     }, 500);
     return () => clearTimeout(timeout);
-  }, [name]);
+  }, [name, pattern, patterns]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

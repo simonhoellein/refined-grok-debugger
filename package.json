@@ -13,7 +13,7 @@
     "node-fetch": "^2.7.0",
     "onigasm": "^2.2.5",
     "oniguruma": "^7.2.1",
-    "postcss-selector-parser": "^6.1.2",
+    "postcss-selector-parser": "^7.0.0",
     "react": "^16.13.1",
     "react-codemirror2": "^7.2.1",
     "react-dom": "^16.13.1",
